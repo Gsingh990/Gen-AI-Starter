@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chatbot
+  labels:
+    app: chatbot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chatbot
+  template:
+    metadata:
+      labels:
+        app: chatbot
+    spec:
+      containers:
+      - name: chatbot
+        image: genaistarterstackacr.azurecr.io/chatbot:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: OPENAI_API_KEY
+          value: "YOUR_OPENAI_API_KEY" # Replace with your actual key
+        - name: OPENAI_ENDPOINT
+          value: "YOUR_OPENAI_ENDPOINT" # Replace with your actual endpoint
