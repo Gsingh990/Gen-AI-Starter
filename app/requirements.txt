@@ -1,4 +1,1 @@
-fastapi
-uvicorn
-openai
-qdrant-client
+pydantic-settings
