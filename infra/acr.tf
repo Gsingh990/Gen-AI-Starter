@@ -1,7 +1,7 @@
-resource "azurerm_container_registry" "acr" {
+module "acr" {
+  source              = "./modules/acr"
   name                = "genaistarterstackacr"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  sku                 = "Standard"
-  admin_enabled       = true
+  location            = module.resource_group.location
+  resource_group_name = module.resource_group.name
+  tags                = var.common_tags
 }

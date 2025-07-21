@@ -12,7 +12,9 @@ provider "azurerm" {
   subscription_id = "3c42098f-375b-47ae-9727-1b0014b0d232"
 }
 
-resource "azurerm_resource_group" "rg" {
+module "resource_group" {
+  source   = "./modules/resource_group"
   name     = var.resource_group_name
   location = var.location
+  tags     = var.common_tags
 }

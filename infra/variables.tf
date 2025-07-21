@@ -1,13 +1,20 @@
 variable "resource_group_name" {
   description = "The name of the resource group."
   type        = string
-  default     = "GenAI-Starter-Stack-RG"
 }
 
 variable "location" {
   description = "The Azure region where the resources will be deployed."
   type        = string
-  default     = "East US"
+}
+
+variable "common_tags" {
+  description = "Common tags to apply to all resources."
+  type        = map(string)
+  default     = {
+    environment = "dev"
+    project     = "GenAIStarterStack"
+  }
 }
 
 variable "vnet_name" {
@@ -73,5 +80,11 @@ variable "jumpbox_admin_username" {
 variable "jumpbox_ssh_public_key" {
   description = "The SSH public key for the jumpbox VM."
   type        = string
-  default     = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII7gIGbBj+JvJVMraEscRfDOdoLbxnw6Nwy4IKljxrfJ gauravsingh@Gauravs-MacBook-Air.local"
+  default     = "ssh-ed25519 AAAAC3NsaC1lZDI1NTE5AAAAII7gIGbBj+JvJVMraEscRfDOdoLbxnw6Nwy4IKljxrfJ gauravsingh@Gauravs-Mac-Book-Air.local"
+}
+
+variable "azure_bastion_subnet_address_prefix" {
+  description = "The address prefix for the Azure Bastion subnet."
+  type        = string
+  default     = "10.0.2.0/26"
 }
