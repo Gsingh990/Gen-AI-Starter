@@ -33,6 +33,12 @@ variable "azure_bastion_subnet_address_prefix" {
   type        = string
 }
 
+variable "nat_gateway_id" {
+  description = "The ID of the NAT Gateway to associate with the AKS subnet."
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   description = "A map of tags to add to the network resources."
   type        = map(string)

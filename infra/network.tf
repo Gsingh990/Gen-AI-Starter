@@ -9,3 +9,8 @@ module "network" {
   azure_bastion_subnet_address_prefix = var.azure_bastion_subnet_address_prefix
   tags                            = var.common_tags
 }
+
+resource "azurerm_subnet_nat_gateway_association" "aks_subnet_nat_gateway_association" {
+  subnet_id      = module.network.aks_subnet_id
+  nat_gateway_id = azurerm_nat_gateway.nat_gateway.id
+}

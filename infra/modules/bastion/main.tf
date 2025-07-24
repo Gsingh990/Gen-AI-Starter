@@ -19,7 +19,7 @@ resource "azurerm_bastion_host" "bastion" {
   kerberos_enabled          = var.kerberos_enabled
   session_recording_enabled = var.session_recording_enabled
   shareable_link_enabled    = var.shareable_link_enabled
-  tunneling_enabled         = var.tunneling_enabled
+  tunneling_enabled         = true
   tags                      = var.tags
 
   ip_configuration {

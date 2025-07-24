@@ -11,7 +11,7 @@ The primary purpose of this GenAI Starter Stack is to empower organizations to r
 **Key Capabilities of the Stack:**
 
 *   **Accelerated Development & Deployment:** Provides a ready-to-deploy template, significantly reducing the effort and time required to go from concept to a functional GenAI application.
-*   **Contextual Understanding & Accurate Responses (RAG Pattern):** The RAG pattern, demonstrated by the chatbot, allows applications to retrieve relevant information from a knowledge base and use that information to generate more precise, factual, and contextually appropriate responses, minimizing LLM hallucinations.
+*   **Contextual Understanding & Accurate Responses (RAG Pattern):** The RAG pattern, demonstrated by the chatbot, allows applications to retrieve relevant information from a knowledge base and use that information to generate more precise, factual, and contextually appropriate answers, minimizing LLM hallucinations.
 *   **Secure & Isolated Environment:** The architecture prioritizes data privacy and security by leveraging Azure's private networking capabilities and secure access controls, keeping sensitive data within your Azure environment.
 *   **Scalability & Reliability:** Built on Azure Kubernetes Service (AKS) and other managed Azure services, the solution can scale horizontally to meet varying demand and offers high availability.
 *   **Modular & Maintainable Codebase:** Both the infrastructure (Terraform) and application (FastAPI) are designed with modularity, separation of concerns, and best practices in mind, promoting long-term maintainability and extensibility.
@@ -33,18 +33,18 @@ GenAI-Starter-Stack/
 │   ├── src/                 # Source code for the FastAPI application
 │   │   ├── api/             # Defines FastAPI routes and API endpoints
 │   │   ├── config/          # Centralized application configuration using Pydantic BaseSettings
-│   │   ├── models/          # Pydantic data models for API requests/responses and internal data structures
-│   │   └── services/        # Contains core business logic, including RAG implementation and external service integrations (OpenAI, Qdrant)
-│   ├── Dockerfile           # Defines the Docker image for containerizing the FastAPI application
-│   ├── main.py              # Main FastAPI application entry point, responsible for app initialization and route inclusion
-│   ├── requirements.txt     # Lists Python dependencies required by the application
-│   ├── chatbot-deployment.yaml # Kubernetes Deployment manifest for the RAG chatbot application
-│   ├── chatbot-service.yaml    # Kubernetes Service manifest to expose the chatbot application within the cluster
-│   ├── qdrant-deployment.yaml  # Kubernetes Deployment manifest for the Qdrant vector database
-│   └── qdrant-service.yaml     # Kubernetes Service manifest to expose the Qdrant database within the cluster
-├── infra/                   # Terraform Infrastructure as Code for Azure resources
-│   ├── modules/             # Reusable Terraform modules for common Azure services
-│   │   ├── acr/             # Module for deploying Azure Container Registry
+│   │   ├── models/          # Pydantic data models
+│   │   ├── services/        # Core RAG logic and external service integrations (OpenAI, Qdrant)
+│   │   └── main.py          # Main FastAPI application entry point
+│   ├── Dockerfile           # Dockerfile for containerizing the application
+│   ├── requirements.txt     # Python dependencies
+│   ├── chatbot-deployment.yaml # Kubernetes Deployment for the chatbot
+│   ├── chatbot-service.yaml    # Kubernetes Service for the chatbot
+│   ├── qdrant-deployment.yaml  # Kubernetes Deployment for Qdrant
+│   └── qdrant-service.yaml     # Kubernetes Service for Qdrant
+├── infra/                   # Terraform Infrastructure as Code
+│   ├── modules/             # Reusable Terraform modules
+│   │   ├── acr/             # Azure Container Registry module
 │   │   ├── aks/             # Module for deploying Azure Kubernetes Service clusters
 │   │   ├── bastion/         # Module for deploying Azure Bastion hosts
 │   │   ├── jumpbox/         # Module for deploying Linux Jump Box Virtual Machines
@@ -53,11 +53,11 @@ GenAI-Starter-Stack/
 │   │   └── resource_group/  # Module for creating and managing Azure Resource Groups
 │   ├── acr.tf               # Root configuration: Calls the `acr` module to deploy Azure Container Registry
 │   ├── aks.tf               # Root configuration: Calls the `aks` module to deploy Azure Kubernetes Service
-│   ├── bastion.tf           # Root configuration: Calls the `bastion` module to deploy Azure Bastion
-│   ├── jumpbox.tf           # Root configuration: Calls the `jumpbox` module to deploy the Jump Box VM
+│   ├── bastion.tf           # Root module call for Bastion
+│   ├── jumpbox.tf           # Root module call for Jump Box
 │   ├── main.tf              # Main Terraform configuration file, orchestrating calls to various modules
-│   ├── network.tf           # Root configuration: Calls the `network` module to define Azure Networking
-│   ├── openai.tf            # Root configuration: Calls the `openai` module to deploy Azure OpenAI Service
+│   ├── network.tf           # Root module call for Networking
+│   ├── openai.tf            # Root module call for Azure OpenAI
 │   ├── outputs.tf           # Defines Terraform outputs, providing access to deployed resource attributes
 │   └── variables.tf         # Defines Terraform input variables for the root module
 └── README.md                # This comprehensive project documentation file
@@ -74,7 +74,7 @@ The GenAI Starter Stack is built on a modern, cloud-native architecture designed
     *   A primary VNet (`GenAI-VNet`).
     *   A dedicated subnet for the AKS cluster (`AKSSubnet`).
     *   A dedicated subnet for Azure Bastion (`AzureBastionSubnet`), ensuring network isolation for management services.
-*   **Azure Kubernetes Service (AKS) Cluster (`aks` module):** The core compute platform for containerized applications. It provides a managed Kubernetes environment, abstracting away the complexities of cluster management. The AKS cluster is configured as a **private cluster**, meaning its API server is not exposed to the public internet, enhancing security. Nodes are deployed into `AKSSubnet`.
+*   **Azure Kubernetes Service (AKS) Cluster (`aks` module):** The core compute platform for containerized applications. It hosts the RAG chatbot and the vector database, providing managed Kubernetes capabilities. The AKS cluster is configured as a **private cluster**, meaning its API server is not exposed to the public internet, enhancing security. Nodes are deployed into `AKSSubnet`.
 *   **Azure Container Registry (ACR) (`acr` module):** A fully managed Docker image registry used to securely store and manage the container images for the chatbot application. It integrates seamlessly with AKS for image pulling.
 *   **Azure OpenAI Service (`openai` module):** Provides access to powerful Large Language Models (LLMs) (e.g., GPT-4o for chat, `text-embedding-ada-002` for embeddings) for natural language understanding, generation, and text embedding. This service is integrated securely within your Azure environment, allowing your applications to leverage cutting-edge AI capabilities.
 *   **Qdrant (Vector Database):** Deployed as a container within the AKS cluster, Qdrant efficiently stores and retrieves vector embeddings. It is crucial for the RAG pattern, enabling semantic search and retrieval of relevant documents based on user queries.
@@ -85,7 +85,7 @@ The GenAI Starter Stack is built on a modern, cloud-native architecture designed
 
 The RAG Chatbot application is built using Python with the FastAPI framework, following a clean, modular, and enterprise-grade architecture:
 
-*   **`main.py`:** The primary entry point for the FastAPI application. It initializes the FastAPI app instance and includes the API routes defined in `src/api/routes.py`.
+*   **`src/main.py`:** The primary entry point for the FastAPI application. It initializes the FastAPI app instance and includes the API routes defined in `src/api/routes.py`.
 *   **`src/api/routes.py`:** Defines the RESTful API endpoints (`/query` and `/index`) for the chatbot. It uses FastAPI's dependency injection to obtain an instance of `RAGService`.
 *   **`src/services/rag_service.py`:** Encapsulates the core RAG logic. This service is responsible for:
     *   Initializing OpenAI and Qdrant clients.
@@ -257,7 +257,7 @@ az acr login --name genaistarterstackacr
 Build and tag the Docker image. Replace `<ACR_LOGIN_SERVER>` with the output from the `az acr show` command.
 
 ```bash
-docker build -t <ACR_LOGIN_SERVER>/chatbot:latest ./app
+docker build --platform linux/amd64 -t <ACR_LOGIN_SERVER>/chatbot:latest ./app
 ```
 
 Push the image to ACR. This makes your application image available for AKS to pull.
@@ -273,10 +273,12 @@ From your **local machine's terminal**, copy the Kubernetes YAML files (`qdrant-
 Replace `<JUMPBOX_PRIVATE_IP>` with the private IP of your jump box. You can find this in the Azure portal under the VM's networking blade, or by running `az vm show --name GenAI-Starter-Stack-RG-jumpbox-vm --resource-group GenAI-Starter-Stack-RG --query privateIps --output tsv` on your local machine.
 
 ```bash
-scp -i ~/.ssh/id_ed25519 ./app/qdrant-deployment.yaml azureuser@<JUMPBOX_PRIVATE_IP>:/home/azureuser/
-scp -i ~/.ssh/id_ed25519 ./app/qdrant-service.yaml azureuser@<JUMPBOX_PRIVATE_IP>:/home/azureuser/
-scp -i ~/.ssh/id_ed25519 ./app/chatbot-deployment.yaml azureuser@<JUMPBOX_PRIVATE_IP>:/home/azureuser/
-scp -i ~/.ssh/id_ed25519 ./app/chatbot-service.yaml azureuser@<JUMPBOX_PRIVATE_IP>:/home/azureuser/
+# Manual file creation on Jump Box (due to SCP/AZ CLI transfer issues)
+# For each file, open nano <filename.yaml> on the jump box, paste content, save, and exit.
+# qdrant-deployment.yaml
+# qdrant-service.yaml
+# chatbot-deployment.yaml
+# chatbot-service.yaml
 ```
 
 #### 5.5. Edit Chatbot Deployment Configuration
@@ -292,9 +294,9 @@ Locate the `env:` section and replace the placeholder values:
 ```yaml
         env:
         - name: OPENAI_API_KEY
-          value: "YOUR_OPENAI_API_KEY" # Replace with your actual Azure OpenAI API Key
+          value: "YOUR_AZURE_OPENAI_API_KEY" # Replace with your actual Azure OpenAI API Key
         - name: OPENAI_ENDPOINT
-          value: "YOUR_OPENAI_ENDPOINT" # Replace with your actual Azure OpenAI Endpoint (e.g., https://<your-openai-account>.openai.azure.com/)
+          value: "YOUR_AZURE_OPENAI_ENDPOINT" # Replace with your actual Azure OpenAI Endpoint (e.g., https://<your-openai-account>.openai.azure.com/)
 ```
 
 Save the file (Ctrl+O, Enter, Ctrl+X in nano).
@@ -323,7 +325,8 @@ Look for `qdrant` and `chatbot` pods in a `Running` state. For services, check i
 
 ### 7. Clean Up Resources (Optional)
 
-To avoid incurring unnecessary costs, you can destroy all the deployed Azure resources when you are finished. This will remove everything provisioned by Terraform.
+To avoid incurring unnecessary costs, you can destroy all the deployed Azure resources when you are finished.
+This will remove everything provisioned by Terraform.
 
 From your **local machine's `infra` directory**:
 

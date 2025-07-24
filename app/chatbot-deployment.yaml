@@ -21,6 +21,12 @@ spec:
         - containerPort: 80
         env:
         - name: OPENAI_API_KEY
-          value: "YOUR_OPENAI_API_KEY" # Replace with your actual key
+          value: "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" # Replace with your actual key
         - name: OPENAI_ENDPOINT
-          value: "YOUR_OPENAI_ENDPOINT" # Replace with your actual endpoint
+          value: "https://genaistack-openai.openai.azure.com/" # Replace with your actual endpoint
+        - name: QDRANT_HOST
+          value: "qdrant"
+        - name: QDRANT_PORT
+          value: "6333" # Ensure this is a string "6333" for the environment variable
+      imagePullSecrets:
+      - name: acr-secret

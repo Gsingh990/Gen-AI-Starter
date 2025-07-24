@@ -12,8 +12,8 @@ resource "azurerm_cognitive_deployment" "openai_model" {
   cognitive_account_id = azurerm_cognitive_account.openai.id
   model {
     format  = "OpenAI"
-    name    = var.model_name
-    version = var.model_version
+    name    = "gpt-4o"
+    version = "2024-08-06"
   }
   sku {
     name     = "Standard"
@@ -26,8 +26,8 @@ resource "azurerm_cognitive_deployment" "embedding_model" {
   cognitive_account_id = azurerm_cognitive_account.openai.id
   model {
     format  = "OpenAI"
-    name    = var.embedding_name
-    version = var.embedding_version
+    name    = "text-embedding-ada-002"
+    version = "2"
   }
   sku {
     name     = "Standard"

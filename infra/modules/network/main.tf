@@ -13,6 +13,7 @@ resource "azurerm_subnet" "aks_subnet" {
   address_prefixes     = [var.aks_subnet_address_prefix]
 }
 
+
 resource "azurerm_subnet" "azure_bastion_subnet" {
   name                 = "AzureBastionSubnet"
   resource_group_name  = var.resource_group_name

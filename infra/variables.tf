@@ -88,3 +88,4 @@ variable "azure_bastion_subnet_address_prefix" {
   type        = string
   default     = "10.0.2.0/26"
 }
+
