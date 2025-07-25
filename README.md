@@ -387,6 +387,50 @@ To set up the RAG Chatbot application for local development and testing without 
 
     The FastAPI application will be accessible at `http://127.0.0.1:8000`. You can test the API endpoints (e.g., `/docs` for Swagger UI) in your browser.
 
+## Troubleshooting
+
+### Qdrant Indexing Error: Invalid Point ID
+
+**Symptom:**
+
+When attempting to index a document, the application returns a `500 Internal Server Error`, and the chatbot pod logs show the following error:
+
+```
+qdrant_client.http.exceptions.UnexpectedResponse: Unexpected Response: 400 (Bad Request)
+Raw response content:
+b'{"status":{"error":"Format error in JSON body: value <some-large-number> is not a valid point ID, valid values are either an unsigned integer or a UUID"},"time":0.0}'
+```
+
+**Cause:**
+
+The `hash()` function in Python, which was previously used to generate document IDs, can produce negative integers. Qdrant, however, requires point IDs to be either a non-negative integer or a valid UUID. This mismatch causes the indexing operation to fail.
+
+**Resolution:**
+
+The application has been updated to use the `uuid` library to generate a unique UUID for each document. This ensures that the point IDs are always in a format that Qdrant accepts.
+
+If you encounter this issue, ensure your application code in `app/src/services/rag_service.py` uses `uuid.uuid4()` to generate the ID for each point, as shown in the updated source code.
+
+### Redeploying the Application
+
+When you make changes to the application code, you need to rebuild the Docker image and redeploy the application to your AKS cluster for the changes to take effect. Because the Docker image is tagged with `:latest`, you must delete the existing pod to force Kubernetes to pull the new image.
+
+1.  **Build and Push the Docker Image:** Follow the instructions in section 5.3 to build and push the updated Docker image to your Azure Container Registry.
+
+2.  **Delete the Chatbot Pod:** From your jump box, find the name of your `chatbot` pod:
+
+    ```bash
+    kubectl get pods
+    ```
+
+    Then, delete the pod to trigger a redeployment:
+
+    ```bash
+    kubectl delete pod <chatbot-pod-name>
+    ```
+
+    Kubernetes will automatically create a new pod, which will pull the latest version of the Docker image.
+
 ## Contributing
 
 We welcome and appreciate contributions to enhance this GenAI Starter Stack. To contribute, please follow these guidelines:

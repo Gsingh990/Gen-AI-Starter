@@ -21,9 +21,9 @@ spec:
         - containerPort: 80
         env:
         - name: OPENAI_API_KEY
-          value: # Replace with your actual key
+          value: " " # Replace with your actual key
         - name: OPENAI_ENDPOINT
-          value: "https://genaistack-openai.openai.azure.com/" # Replace with your actual endpoint
+          value: " " # Replace with your actual endpoint
         - name: QDRANT_HOST
           value: "qdrant"
         - name: QDRANT_PORT

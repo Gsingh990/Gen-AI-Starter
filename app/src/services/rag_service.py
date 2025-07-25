@@ -1,3 +1,4 @@
+import uuid
 from openai import OpenAI, AzureOpenAI
 from qdrant_client import QdrantClient, models
 from src.config.settings import settings
@@ -63,7 +64,7 @@ class RAGService:
             collection_name="my_collection",
             points=[
                 models.PointStruct(
-                    id=str(hash(document.text)),
+                    id=str(uuid.uuid4()),
                     vector=embedding,
                     payload={"text": document.text, "metadata": document.metadata}
                 )
