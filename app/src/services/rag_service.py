@@ -1,4 +1,6 @@
 import uuid
+import uuid
+import os
 from openai import OpenAI, AzureOpenAI
 from qdrant_client import QdrantClient, models
 from src.config.settings import settings
@@ -6,10 +8,16 @@ from src.models.models import Document
 
 class RAGService:
     def __init__(self):
+        # Read secrets from mounted files
+        with open("/mnt/secrets-store/openai-api-key", "r") as f:
+            openai_api_key = f.read().strip()
+        with open("/mnt/secrets-store/openai-endpoint", "r") as f:
+            openai_endpoint = f.read().strip()
+
         self.openai_client = AzureOpenAI(
-            api_key=settings.OPENAI_API_KEY,
+            api_key=openai_api_key,
             api_version="2023-07-01-preview", # Use the API version compatible with your deployment
-            azure_endpoint=settings.OPENAI_ENDPOINT
+            azure_endpoint=openai_endpoint
         )
         self.qdrant_client = QdrantClient(host=settings.QDRANT_HOST, port=settings.QDRANT_PORT)
         self._ensure_qdrant_collection()

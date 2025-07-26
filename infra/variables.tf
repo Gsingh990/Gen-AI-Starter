@@ -89,3 +89,15 @@ variable "azure_bastion_subnet_address_prefix" {
   default     = "10.0.2.0/26"
 }
 
+variable "openai_api_key" {
+  description = "The API key for the Azure OpenAI service."
+  type        = string
+  sensitive   = true
+}
+
+variable "openai_endpoint" {
+  description = "The endpoint for the Azure OpenAI service."
+  type        = string
+  sensitive   = true
+}
+

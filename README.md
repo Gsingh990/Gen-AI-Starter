@@ -2,19 +2,19 @@
 
 ## Executive Summary
 
-This GenAI Starter Stack provides a comprehensive, production-ready foundation for building and deploying Retrieval-Augmented Generation (RAG) chatbots and other GenAI-powered applications on Microsoft Azure. It leverages a powerful combination of Azure-native services and popular open-source technologies, orchestrated through enterprise-grade Infrastructure-as-Code (IaC) and a modular application architecture. This stack significantly accelerates the development and deployment of custom GenAI solutions, reducing time-to-value by providing a secure, scalable, and cost-effective blueprint.
+This GenAI Starter Stack provides a comprehensive, **enterprise-grade** foundation for building and deploying Retrieval-Augmented Generation (RAG) chatbots on Microsoft Azure. It has been enhanced with a user-friendly web interface and critical production features, including robust security, auto-scaling, monitoring, and automated testing. It leverages a powerful combination of Azure-native services and popular open-source technologies, orchestrated through enterprise-grade Infrastructure-as-Code (IaC) and a modular application architecture. This stack significantly accelerates the development and deployment of custom GenAI solutions, reducing time-to-value by providing a secure, scalable, and cost-effective blueprint.
 
 ## Project Overview
 
-The primary purpose of this GenAI Starter Stack is to empower organizations to rapidly develop and deploy intelligent applications capable of interacting with and providing answers based on their proprietary data. While the included example is a RAG chatbot, the underlying infrastructure and application patterns are designed to be flexible and extensible for various GenAI use cases.
+The primary purpose of this GenAI Starter Stack is to empower organizations to rapidly develop and deploy intelligent, enterprise-ready applications capable of interacting with and providing answers based on their proprietary data. The included RAG chatbot now features a full user interface and has been fortified for production workloads.
 
 **Key Capabilities of the Stack:**
 
-*   **Accelerated Development & Deployment:** Provides a ready-to-deploy template, significantly reducing the effort and time required to go from concept to a functional GenAI application.
-*   **Contextual Understanding & Accurate Responses (RAG Pattern):** The RAG pattern, demonstrated by the chatbot, allows applications to retrieve relevant information from a knowledge base and use that information to generate more precise, factual, and contextually appropriate answers, minimizing LLM hallucinations.
-*   **Secure & Isolated Environment:** The architecture prioritizes data privacy and security by leveraging Azure's private networking capabilities and secure access controls, keeping sensitive data within your Azure environment.
-*   **Scalability & Reliability:** Built on Azure Kubernetes Service (AKS) and other managed Azure services, the solution can scale horizontally to meet varying demand and offers high availability.
-*   **Modular & Maintainable Codebase:** Both the infrastructure (Terraform) and application (FastAPI) are designed with modularity, separation of concerns, and best practices in mind, promoting long-term maintainability and extensibility.
+*   **Interactive Chat UI:** A clean, responsive, and user-friendly web interface for interacting with the chatbot.
+*   **Enterprise-Grade Security:** Management of sensitive credentials like API keys using Kubernetes Secrets instead of insecure plaintext configurations.
+*   **High Availability & Auto-Scaling:** Ensures the application is resilient and can handle variable loads with Kubernetes liveness/readiness probes and a Horizontal Pod Autoscaler (HPA).
+*   **Monitoring & Observability:** Exposes key application metrics via a `/metrics` endpoint for Prometheus and uses structured logging for easier analysis and debugging.
+*   **Improved Code Quality:** Includes a suite of unit tests for the core application logic, ensuring reliability and maintainability.
 
 This project provides the following core components:
 
@@ -32,16 +32,24 @@ GenAI-Starter-Stack/
 ├── app/                     # RAG Chatbot Application Code
 │   ├── src/                 # Source code for the FastAPI application
 │   │   ├── api/             # Defines FastAPI routes and API endpoints
-│   │   ├── config/          # Centralized application configuration using Pydantic BaseSettings
+│   │   ├── config/          # Centralized application configuration
 │   │   ├── models/          # Pydantic data models
-│   │   ├── services/        # Core RAG logic and external service integrations (OpenAI, Qdrant)
+│   │   ├── services/        # Core RAG logic and external service integrations
 │   │   └── main.py          # Main FastAPI application entry point
-│   ├── Dockerfile           # Dockerfile for containerizing the application
-│   ├── requirements.txt     # Python dependencies
+│   ├── static/              # Static files for the chat UI
+│   │   ├── index.html       # Main HTML file for the UI
+│   │   ├── script.js        # JavaScript for chat functionality
+│   │   └── style.css        # CSS for UI styling
+│   ├── tests/               # Unit tests for the application
+│   │   └── test_rag_service.py # Tests for the RAG service
 │   ├── chatbot-deployment.yaml # Kubernetes Deployment for the chatbot
+│   ├── chatbot-hpa.yaml      # Kubernetes Horizontal Pod Autoscaler
+│   ├── chatbot-secret.yaml   # Kubernetes Secret for API keys (template)
 │   ├── chatbot-service.yaml    # Kubernetes Service for the chatbot
+│   ├── Dockerfile           # Dockerfile for containerizing the application
 │   ├── qdrant-deployment.yaml  # Kubernetes Deployment for Qdrant
-│   └── qdrant-service.yaml     # Kubernetes Service for Qdrant
+│   ├── qdrant-service.yaml     # Kubernetes Service for Qdrant
+│   └── requirements.txt     # Python dependencies
 ├── infra/                   # Terraform Infrastructure as Code
 │   ├── modules/             # Reusable Terraform modules
 │   │   ├── acr/             # Azure Container Registry module
@@ -65,7 +73,7 @@ GenAI-Starter-Stack/
 
 ## Architecture
 
-The GenAI Starter Stack is built on a modern, cloud-native architecture designed for performance, scalability, and security. The entire infrastructure is provisioned using modular Terraform configurations, ensuring consistency, reusability, and adherence to Infrastructure-as-Code principles.
+The architecture has been enhanced with several enterprise-grade features to improve security, scalability, and observability.
 
 ### Infrastructure Architecture
 
@@ -83,19 +91,18 @@ The GenAI Starter Stack is built on a modern, cloud-native architecture designed
 
 ### Application Architecture (RAG Chatbot)
 
-The RAG Chatbot application is built using Python with the FastAPI framework, following a clean, modular, and enterprise-grade architecture:
+The application architecture now includes a user interface and several production-readiness features:
 
-*   **`src/main.py`:** The primary entry point for the FastAPI application. It initializes the FastAPI app instance and includes the API routes defined in `src/api/routes.py`.
-*   **`src/api/routes.py`:** Defines the RESTful API endpoints (`/query` and `/index`) for the chatbot. It uses FastAPI's dependency injection to obtain an instance of `RAGService`.
-*   **`src/services/rag_service.py`:** Encapsulates the core RAG logic. This service is responsible for:
-    *   Initializing OpenAI and Qdrant clients.
-    *   Handling query embedding using Azure OpenAI's embedding models.
-    *   Performing similarity searches in Qdrant to retrieve relevant documents.
-    *   Constructing augmented prompts for the LLM based on retrieved context.
-    *   Generating responses using Azure OpenAI's chat models.
-    *   Indexing new documents by embedding them and storing them in Qdrant.
-*   **`src/models/models.py`:** Contains Pydantic models (`Query`, `Document`) that define the data structures for API requests and responses, ensuring data validation and clear contracts.
-*   **`src/config/settings.py`:** Centralizes application configuration using Pydantic's `BaseSettings`. This allows environment variables to be loaded and validated automatically, providing a robust and flexible way to manage settings (e.g., API keys, endpoints).
+*   **Frontend (Chat UI):** A new `static` directory contains the HTML, CSS, and JavaScript files for a user-friendly chat interface, served directly by the FastAPI backend.
+*   **Backend (FastAPI):**
+    *   **`src/main.py`:** Now serves the static frontend files, includes a `/health` endpoint for Kubernetes probes, and exposes a `/metrics` endpoint for Prometheus.
+    *   **`src/services/rag_service.py`:** Core RAG logic remains the same.
+*   **Enterprise Features:**
+    *   **Security:** The `chatbot-deployment.yaml` is now configured to pull the OpenAI API key and endpoint from a Kubernetes secret (`openai-secrets`), defined in `chatbot-secret.yaml`. This avoids storing sensitive data in plaintext.
+    *   **Scalability:** The `chatbot-hpa.yaml` file defines a Horizontal Pod Autoscaler that automatically scales the number of chatbot pods based on CPU utilization.
+    *   **Resilience:** The `chatbot-deployment.yaml` includes liveness and readiness probes pointing to the `/health` endpoint. This allows Kubernetes to automatically manage pod health, restarting unhealthy pods and only routing traffic to ready ones.
+    *   **Observability:** The application is instrumented with `prometheus-fastapi-instrumentator` to expose metrics at `/metrics` and uses `structlog` for structured JSON logging, which is easier to parse and analyze in a log aggregation system.
+    *   **Testing:** The `tests` directory contains unit tests for the `RAGService`, which can be run to ensure code quality and prevent regressions.
 
 ## Deployment Steps
 
@@ -113,6 +120,10 @@ Ensure you have the following tools installed and configured on your local machi
 *   **Docker Desktop:** Required for building and pushing Docker images. Ensure it's running. [Installation Guide](https://docs.docker.com/desktop/install/)
 *   **`kubectl`:** Kubernetes command-line tool. [Installation Guide](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 *   **SSH Key Pair:** A public and private SSH key pair for connecting to the jump box VM. If you don't have one, generate it using `ssh-keygen`.
+*   **Secrets Store CSI Driver:** This driver is required for AKS to integrate with Azure Key Vault. Install it on your AKS cluster using the following command:
+    ```bash
+    az aks enable-addons --addons azure-keyvault-secrets-provider --name <your-aks-cluster-name> --resource-group <your-resource-group-name>
+    ```
 
 ### 1. Clone the Repository
 
@@ -268,60 +279,71 @@ docker push <ACR_LOGIN_SERVER>/chatbot:latest
 
 #### 5.4. Transfer Kubernetes Manifests
 
-From your **local machine's terminal**, copy the Kubernetes YAML files (`qdrant-deployment.yaml`, `qdrant-service.yaml`, `chatbot-deployment.yaml`, `chatbot-service.yaml`) to the jump box. This is necessary because the jump box is where you will run `kubectl apply`.
-
-Replace `<JUMPBOX_PRIVATE_IP>` with the private IP of your jump box. You can find this in the Azure portal under the VM's networking blade, or by running `az vm show --name GenAI-Starter-Stack-RG-jumpbox-vm --resource-group GenAI-Starter-Stack-RG --query privateIps --output tsv` on your local machine.
+From your **local machine**, copy all the necessary YAML files from the `app` directory to the jump box.
 
 ```bash
-# Manual file creation on Jump Box (due to SCP/AZ CLI transfer issues)
+# On your local machine, create the files on the jump box
 # For each file, open nano <filename.yaml> on the jump box, paste content, save, and exit.
-# qdrant-deployment.yaml
-# qdrant-service.yaml
-# chatbot-deployment.yaml
-# chatbot-service.yaml
+# qdrant-deployment.yaml, qdrant-service.yaml
+# chatbot-deployment.yaml, chatbot-service.yaml, chatbot-hpa.yaml, secretproviderclass.yaml
 ```
 
-#### 5.5. Edit Chatbot Deployment Configuration
+#### 5.5. Deploy SecretProviderClass and Application to AKS
 
-Switch back to your **jump box terminal**. Edit the `chatbot-deployment.yaml` file to include your Azure OpenAI API Key and Endpoint. These are sensitive values and should be retrieved securely from your Azure OpenAI resource in the Azure portal.
+Switch back to your **jump box terminal**. Apply the `secretproviderclass.yaml` first, then the remaining Kubernetes manifests:
 
 ```bash
-nano chatbot-deployment.yaml
-```
+# Deploy SecretProviderClass
+kubectl apply -f secretproviderclass.yaml
 
-Locate the `env:` section and replace the placeholder values:
-
-```yaml
-        env:
-        - name: OPENAI_API_KEY
-          value: "YOUR_AZURE_OPENAI_API_KEY" # Replace with your actual Azure OpenAI API Key
-        - name: OPENAI_ENDPOINT
-          value: "YOUR_AZURE_OPENAI_ENDPOINT" # Replace with your actual Azure OpenAI Endpoint (e.g., https://<your-openai-account>.openai.azure.com/)
-```
-
-Save the file (Ctrl+O, Enter, Ctrl+X in nano).
-
-#### 5.6. Deploy Qdrant and Chatbot to AKS
-
-From your **jump box terminal**, apply the Kubernetes manifests to deploy the Qdrant vector database and the RAG chatbot application to your AKS cluster:
-
-```bash
+# Deploy Qdrant
 kubectl apply -f qdrant-deployment.yaml
 kubectl apply -f qdrant-service.yaml
+
+# Deploy the Chatbot Application, Service, and HPA
 kubectl apply -f chatbot-deployment.yaml
 kubectl apply -f chatbot-service.yaml
+kubectl apply -f chatbot-hpa.yaml
 ```
 
-### 6. Verify Deployment
+### 6. Verify Deployment and Access UI
 
-From your **jump box terminal**, verify that the deployments were successful and the pods are running:
+Verify that the pods are running:
 
 ```bash
 kubectl get pods
+kubectl get hpa
+```
+
+To access the chatbot UI, you need to forward the port of the `chatbot` service to your local machine from the jump box.
+
+First, find the name of the chatbot service:
+```bash
 kubectl get services
 ```
 
-Look for `qdrant` and `chatbot` pods in a `Running` state. For services, check if the `chatbot` service has an external IP (if configured as LoadBalancer) or a ClusterIP (if internal).
+Then, use `kubectl port-forward` to forward a local port (e.g., 8080) to the service's port (80). Run this command **in your jump box terminal** and keep it running.
+
+```bash
+kubectl port-forward service/chatbot 8080:80
+```
+
+Now, open a new **local terminal** (not the jump box one) and forward that same port from the jump box to your local machine. You will need to re-run the `az network bastion ssh` command with an `-L` flag for port forwarding.
+
+```bash
+# This command is run on your local machine
+az network bastion ssh \
+  --name GenAI-VNet-bastion \
+  --resource-group GenAI-Starter-Stack-RG \
+  --target-resource-id $(az vm show --name GenAI-Starter-Stack-RG-jumpbox-vm --resource-group GenAI-Starter-Stack-RG --query id --output tsv) \
+  --auth-type ssh-key \
+  --username azureuser \
+  --ssh-key ~/.ssh/id_ed25519 \
+  -L 8080:localhost:8080
+```
+
+Once connected, you can access the chatbot UI in your local browser at **http://localhost:8080**.
+
 
 ### 7. Clean Up Resources (Optional)
 
@@ -345,47 +367,39 @@ The RAG Chatbot application uses environment variables for configuration, manage
 
 ## Local Development
 
-To set up the RAG Chatbot application for local development and testing without deploying to Azure:
+The local development process is updated to include running tests and accessing the new UI.
 
 1.  **Prerequisites:**
-    *   Python 3.9+ installed on your local machine.
-    *   Docker Desktop installed and running (for local Qdrant instance).
+    *   Python 3.9+
+    *   Docker Desktop (for Qdrant)
 
 2.  **Install Python Dependencies:**
-
-    Navigate to the `app` directory and install the required Python packages:
-
+    Navigate to the `app` directory and install the required packages, including the new ones for testing and monitoring.
     ```bash
     cd app
     pip install -r requirements.txt
     ```
 
 3.  **Run Local Qdrant (Docker):**
-
-    Start a local instance of the Qdrant vector database using Docker. This will expose Qdrant on ports 6333 (gRPC) and 6334 (HTTP).
-
     ```bash
     docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant
     ```
 
-4.  **Create `.env` file for Local Configuration:**
+4.  **Local Configuration (for Qdrant only):**
+    If you are running Qdrant locally, you don't need to create a `.env` file for OpenAI credentials as they are now read from mounted files in the Kubernetes deployment. However, if you need to override Qdrant host/port for local testing, you can still use environment variables or modify `src/config/settings.py` directly.
 
-    Create a `.env` file in the `app/src` directory. This file will hold your Azure OpenAI credentials for local testing. **Do not commit this file to Git.**
-
-    ```
-    OPENAI_API_KEY="YOUR_AZURE_OPENAI_API_KEY"
-    OPENAI_ENDPOINT="YOUR_AZURE_OPENAI_ENDPOINT"
-    ```
-
-5.  **Run the FastAPI Application Locally:**
-
-    Navigate to the `app` directory and start the FastAPI application. The `--reload` flag enables hot-reloading during development.
-
+5.  **Run Unit Tests (Optional):**
+    From the `app` directory, run the unit tests:
     ```bash
-    uvicorn src.main:app --reload
+    python -m unittest discover tests
     ```
 
-    The FastAPI application will be accessible at `http://127.0.0.1:8000`. You can test the API endpoints (e.g., `/docs` for Swagger UI) in your browser.
+6.  **Run the FastAPI Application Locally:**
+    From the `app` directory, start the FastAPI application:
+    ```bash
+    uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+    ```
+    The application will be accessible at `http://127.0.0.1:8000`. The chat UI is available at the root URL, and the OpenAPI docs are at `/docs`.
 
 ## Troubleshooting
 

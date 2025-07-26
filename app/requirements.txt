@@ -3,3 +3,5 @@ uvicorn
 openai
 qdrant-client
 pydantic-settings
+structlog
+prometheus-fastapi-instrumentator
