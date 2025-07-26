@@ -11,7 +11,7 @@ The primary purpose of this GenAI Starter Stack is to empower organizations to r
 **Key Capabilities of the Stack:**
 
 *   **Interactive Chat UI:** A clean, responsive, and user-friendly web interface for interacting with the chatbot.
-*   **Enterprise-Grade Security:** Management of sensitive credentials like API keys using Kubernetes Secrets instead of insecure plaintext configurations.
+*   **Enterprise-Grade Security:** Secure management of sensitive credentials (like API keys) using Azure Key Vault, integrated with AKS via the Secrets Store CSI Driver.
 *   **High Availability & Auto-Scaling:** Ensures the application is resilient and can handle variable loads with Kubernetes liveness/readiness probes and a Horizontal Pod Autoscaler (HPA).
 *   **Monitoring & Observability:** Exposes key application metrics via a `/metrics` endpoint for Prometheus and uses structured logging for easier analysis and debugging.
 *   **Improved Code Quality:** Includes a suite of unit tests for the core application logic, ensuring reliability and maintainability.
@@ -44,7 +44,7 @@ GenAI-Starter-Stack/
 │   │   └── test_rag_service.py # Tests for the RAG service
 │   ├── chatbot-deployment.yaml # Kubernetes Deployment for the chatbot
 │   ├── chatbot-hpa.yaml      # Kubernetes Horizontal Pod Autoscaler
-│   ├── chatbot-secret.yaml   # Kubernetes Secret for API keys (template)
+│   ├── secretproviderclass.yaml   # Kubernetes SecretProviderClass for Azure Key Vault integration
 │   ├── chatbot-service.yaml    # Kubernetes Service for the chatbot
 │   ├── Dockerfile           # Dockerfile for containerizing the application
 │   ├── qdrant-deployment.yaml  # Kubernetes Deployment for Qdrant
@@ -98,7 +98,7 @@ The application architecture now includes a user interface and several productio
     *   **`src/main.py`:** Now serves the static frontend files, includes a `/health` endpoint for Kubernetes probes, and exposes a `/metrics` endpoint for Prometheus.
     *   **`src/services/rag_service.py`:** Core RAG logic remains the same.
 *   **Enterprise Features:**
-    *   **Security:** The `chatbot-deployment.yaml` is now configured to pull the OpenAI API key and endpoint from a Kubernetes secret (`openai-secrets`), defined in `chatbot-secret.yaml`. This avoids storing sensitive data in plaintext.
+    *   **Security:** Sensitive credentials (like Azure OpenAI API Key and Endpoint) are now securely managed using **Azure Key Vault**. The AKS cluster's managed identity is granted access to Key Vault secrets. The Secrets Store CSI Driver for Kubernetes is used to mount these secrets directly into the application pods as files, ensuring that sensitive information is never exposed as environment variables or stored directly in Kubernetes manifests. The `secretproviderclass.yaml` defines how these secrets are retrieved from Key Vault.
     *   **Scalability:** The `chatbot-hpa.yaml` file defines a Horizontal Pod Autoscaler that automatically scales the number of chatbot pods based on CPU utilization.
     *   **Resilience:** The `chatbot-deployment.yaml` includes liveness and readiness probes pointing to the `/health` endpoint. This allows Kubernetes to automatically manage pod health, restarting unhealthy pods and only routing traffic to ready ones.
     *   **Observability:** The application is instrumented with `prometheus-fastapi-instrumentator` to expose metrics at `/metrics` and uses `structlog` for structured JSON logging, which is easier to parse and analyze in a log aggregation system.
@@ -358,10 +358,9 @@ terraform destroy -auto-approve
 
 ## Application Configuration
 
-The RAG Chatbot application uses environment variables for configuration, managed robustly via Pydantic's `BaseSettings`. These variables are typically injected into the Kubernetes deployment manifest or provided during local development.
+The RAG Chatbot application's configuration is managed robustly via Pydantic's `BaseSettings` and environment variables. Sensitive credentials are now sourced from Azure Key Vault in the Kubernetes deployment.
 
-*   `OPENAI_API_KEY`: Your Azure OpenAI API key. This is a sensitive credential and should be handled securely (e.g., Kubernetes Secrets).
-*   `OPENAI_ENDPOINT`: Your Azure OpenAI endpoint (e.g., `https://<your-openai-account>.openai.azure.com/`).
+*   **Azure OpenAI Credentials:** In the Kubernetes deployment, `OPENAI_API_KEY` and `OPENAI_ENDPOINT` are read directly from files mounted by the Secrets Store CSI Driver (e.g., `/mnt/secrets-store/openai-api-key`). For local development, these can still be provided via environment variables or a `.env` file.
 *   `QDRANT_HOST`: The hostname or IP address of the Qdrant service. Within Kubernetes, this will typically be the service name (default: `qdrant`).
 *   `QDRANT_PORT`: The port of the Qdrant service (default: `6333`).
 
